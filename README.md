@@ -1,1 +1,1 @@
-# reimagined-octo-fishstick
+# aws-image-analytics
