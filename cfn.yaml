@@ -2,6 +2,17 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: "TBD"
 
 Resources:
+  LambdaEventSourceMapping:
+    Properties:
+      EventSourceArn: !GetAtt SqsQueue.Arn
+      FunctionName: !Ref LambdaFunction
+    Type: "AWS::Lambda::EventSourceMapping"
+
+  LambdaFunction:
+    Properties:
+
+    Type: "AWS::Lambda::Function"
+
   S3Bucket:
     DependsOn: SqsQueuePolicy
     Properties:
