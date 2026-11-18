@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "TBD"
+
+Resources:
+  S3Bucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: "ex-buck-fred"
+  
+  SqsQueue:
+    Type: "AWS::SQS::Queue"
+    Properties: 
+      FifoQueue: true
+      QueueName: "test-fred.fifo"
