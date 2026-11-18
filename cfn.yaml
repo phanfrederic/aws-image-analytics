@@ -23,11 +23,12 @@ Resources:
             Statement:
               - Action:
                   - "s3:GetObject"
-                  - "s3:ListObjects"
+                  - "s3:ListBuckets"
                 Effect: "Allow"
                 Resource:
                   - !GetAtt S3Bucket.Arn
               - Action:
+                  - "sqs:DeleteMessage"
                   - "sqs:ReceiveMessage"
                 Effect: "Allow"
                 Resource:
