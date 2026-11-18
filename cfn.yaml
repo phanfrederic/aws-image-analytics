@@ -5,7 +5,7 @@ Resources:
   S3Bucket:
     DependsOn: SqsQueuePolicy
     Properties:
-      #BucketName: "ex-buck-fred"
+      # BucketName: "ex-buck-fred"
       NotificationConfiguration:
         QueueConfigurations: 
           - Event: "s3:ObjectCreated:*"
@@ -25,9 +25,9 @@ Resources:
     Type: "AWS::S3::Bucket"
   
   SqsQueue:
-    Properties: 
-      #FifoQueue: true
-      #QueueName: "test-fred.fifo"
+    # Properties: 
+      # FifoQueue: true
+      # QueueName: "test-fred.fifo"
     Type: "AWS::SQS::Queue"
 
   SqsQueuePolicy:
