@@ -3,12 +3,47 @@ Description: "TBD"
 
 Resources:
   S3Bucket:
-    Type: "AWS::S3::Bucket"
     Properties:
-      BucketName: "ex-buck-fred"
+      #BucketName: "ex-buck-fred"
+      NotificationConfiguration:
+        - Event: "s3:ObjectCreated:*"
+          Filter:
+            S3Key:
+              Rules:
+                - Name: "suffix"
+                  Value: ".jpg"
+          Queue: !GetAtt SqsQueue.Arn
+        - Event: "s3:ObjectCreated:*"
+          Filter:
+            S3Key:
+              Rules:
+                - Name: "suffix"
+                  Value: ".png"
+          Queue: !GetAtt SqsQueue.Arn
+    Type: "AWS::S3::Bucket"
   
   SqsQueue:
-    Type: "AWS::SQS::Queue"
     Properties: 
       FifoQueue: true
-      QueueName: "test-fred.fifo"
+      #QueueName: "test-fred.fifo"
+    Type: "AWS::SQS::Queue"
+
+  SqsQueuePolicy:
+    Properties: 
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Action: 
+            - "SQS:SendMessage"
+          Condition:
+            ArnLike:
+              aws:SourceArn: !GetAtt S3Bucket.Arn
+            StringEquals:
+              aws:SourceAccount: !Ref AWS::AccountId
+          Effect: "Allow"
+          Principal:
+            Service: "s3.amazonaws.com"
+          Resource: !GetAtt SqsQueue.Arn
+      Queues: 
+        - !Ref SqsQueue
+    Type: "AWS::SQS::QueuePolicy"
