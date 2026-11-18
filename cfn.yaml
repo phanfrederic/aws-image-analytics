@@ -18,7 +18,7 @@ Resources:
       #   - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 
       Policies:
-        - PolicyName: ""
+        - PolicyName: "S3AndSQSAccessPolicy"
           PolicyDocument: 
             Statement:
               - Action:
@@ -49,9 +49,11 @@ Resources:
           import boto3
 
           s3 = boto3.resource("s3")
-          for bucket in s3.buckets.all():
-            print(bucket.name)
-      Role:
+          def handler(event, context):
+            for bucket in s3.buckets.all():
+              print(bucket.name)
+      Handler: "index.handler"
+      Role: !GetAtt IamRole.Arn
       Runtime: "python3.14"
       Timeout: 900
     Type: "AWS::Lambda::Function"
