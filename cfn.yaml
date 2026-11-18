@@ -2,6 +2,40 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: "TBD"
 
 Resources:
+  IamRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          Action:
+            - "sts:AssumeRole"
+          Effect: "Allow"
+          Principal:
+            Service: 
+              - "lambda.amazonaws.com"
+        Version: "2012-10-17"
+
+      # ManagedPolicyArns:
+      #   - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+
+      Policies:
+        - PolicyName: ""
+          PolicyDocument: 
+            Statement:
+              - Action:
+                  - "s3:GetObject"
+                  - "s3:ListObjects"
+                Effect: "Allow"
+                Resource:
+                  - !GetAtt S3Bucket.Arn
+              - Action:
+                  - "sqs:ReceiveMessage"
+                Effect: "Allow"
+                Resource:
+                  - !GetAtt SqsQueue.Arn
+            Version: "2012-10-17"
+
+    Type: "AWS::IAM::Role"
+
   LambdaEventSourceMapping:
     Properties:
       EventSourceArn: !GetAtt SqsQueue.Arn
@@ -13,7 +47,7 @@ Resources:
       Code: 
         ZipFile: |
           import boto3
-          
+
           s3 = boto3.resource("s3")
           for bucket in s3.buckets.all():
             print(bucket.name)
