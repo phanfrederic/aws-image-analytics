@@ -8,7 +8,6 @@ on:
 env:
   CLOUDFORMATION_STACK_NAME: "image-stack"
   S3_BUCKET_NAME: "fred-pkg-tmp"
-  TEMPLATE_FILE_NAME: "main.yaml"
 
 permissions:
   contents: read
@@ -33,11 +32,11 @@ jobs:
         run: |
           aws cloudformation package \
             --s3-bucket ${{ env.S3_BUCKET_NAME }} \
-            --template-file ${{ env.TEMPLATE_FILE_NAME }}
+            --template-file main.yaml
 
       - name: Deploy CloudFormation stack
         run: |
           aws cloudformation deploy \
             --capabilities CAPABILITY_NAMED_IAM \
             --stack-name ${{ env.CLOUDFORMATION_STACK_NAME }} \
-            --template-file ${{ env.TEMPLATE_FILE_NAME }}
+            --template-file packaged-main.yaml
