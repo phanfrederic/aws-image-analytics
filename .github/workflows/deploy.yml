@@ -1,0 +1,31 @@
+name: AWS example workflow
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  🚀deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Configure AWS credential
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: eu-west-3
+          role-to-assume: arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction
+
+      - name: Deploy CloudFormation stack
+        run: |
+          aws cloudformation deploy \
+            --stack-name image-stack \
+            --template-file cfn.yaml \
