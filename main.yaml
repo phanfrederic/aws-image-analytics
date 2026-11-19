@@ -14,7 +14,7 @@ Resources:
     Properties:
       Parameters:
         SqsQueueArn: !GetAtt SqsStack.Outputs.SqsQueueArn
-      TemplateURL: "./templates/S3.yaml"
+      TemplateURL: "./templates/s3.yaml"
     Type: "AWS::CloudFormation::Stack"
   
   SqsStack:
