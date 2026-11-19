@@ -6,7 +6,6 @@ Parameters:
 
 Resources:
   S3Bucket:
-    DependsOn: SqsQueuePolicy
     Properties:
       NotificationConfiguration:
         QueueConfigurations: 

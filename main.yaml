@@ -11,6 +11,7 @@ Resources:
     Type: "AWS::CloudFormation::Stack"
 
   S3Stack:
+    DependsOn: SqsStack
     Properties:
       Parameters:
         SqsQueueArn: !GetAtt SqsStack.Outputs.SqsQueueArn
