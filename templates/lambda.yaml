@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  S3BucketArn:
+    Type: String
+  S3BucketName:
+    Type: String
+  SqsQueueArn:
+    Type: String
+
+Resources:
+  IamRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          Action:
+            - "sts:AssumeRole"
+          Effect: "Allow"
+          Principal:
+            Service: 
+              - "lambda.amazonaws.com"
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      Policies:
+        - PolicyName: "S3AndSQSAccessPolicy"
+          PolicyDocument: 
+            Statement:
+              - Action:
+                  - "s3:GetObject"
+                  - "s3:ListBucket"
+                Effect: "Allow"
+                Resource:
+                  - !Ref S3BucketArn
+              - Action:
+                  - "sqs:DeleteMessage"
+                  - "sqs:GetQueueAttributes"
+                  - "sqs:ReceiveMessage"
+                Effect: "Allow"
+                Resource:
+                  - !Ref SqsQueueArn
+            Version: "2012-10-17"
+    Type: "AWS::IAM::Role"
+
+  LambdaEventSourceMapping:
+    Properties:
+      EventSourceArn: !Ref SqsQueueArn
+      FunctionName: !Ref LambdaFunction
+    Type: "AWS::Lambda::EventSourceMapping"
+
+  LambdaFunction:
+    Properties:
+      Code: 
+        ZipFile: |
+          import boto3
+          import os
+
+          def handler(event, context):
+            s3 = boto3.resource("s3")
+            bucket_name = os.environ["BUCKET_NAME"]
+            bucket = s3.Bucket(bucket_name)
+            for obj in bucket.objects.all():
+              print(obj.key)
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref S3BucketName
+      Handler: "index.handler"
+      Role: !GetAtt IamRole.Arn
+      Runtime: "python3.14"
+      Timeout: 60
+    Type: "AWS::Lambda::Function"

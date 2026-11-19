@@ -1,113 +1,23 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "TBD"
 
 Resources:
-  IamRole:
+  LambdaStack:
     Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-          Action:
-            - "sts:AssumeRole"
-          Effect: "Allow"
-          Principal:
-            Service: 
-              - "lambda.amazonaws.com"
-        Version: "2012-10-17"
-      ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-      Policies:
-        - PolicyName: "S3AndSQSAccessPolicy"
-          PolicyDocument: 
-            Statement:
-              - Action:
-                  - "s3:GetObject"
-                  - "s3:ListBucket"
-                Effect: "Allow"
-                Resource:
-                  - !GetAtt S3Bucket.Arn
-              - Action:
-                  - "sqs:DeleteMessage"
-                  - "sqs:GetQueueAttributes"
-                  - "sqs:ReceiveMessage"
-                Effect: "Allow"
-                Resource:
-                  - !GetAtt SqsQueue.Arn
-            Version: "2012-10-17"
-    Type: "AWS::IAM::Role"
+      Parameters:
+        S3BucketArn: !GetAtt S3Stack.Outputs.S3BucketArn
+        S3BucketName: !GetAtt S3Stack.Outputs.S3BucketName
+        SqsQueueArn: !GetAtt SqsStack.Outputs.SqsQueueArn
+      TemplateURL: "./templates/lambda.yaml"
+    Type: "AWS::CloudFormation::Stack"
 
-  LambdaEventSourceMapping:
+  S3Stack:
     Properties:
-      EventSourceArn: !GetAtt SqsQueue.Arn
-      FunctionName: !Ref LambdaFunction
-    Type: "AWS::Lambda::EventSourceMapping"
-
-  LambdaFunction:
-    Properties:
-      Code: 
-        ZipFile: |
-          import boto3
-          import os
-
-          def handler(event, context):
-            s3 = boto3.resource("s3")
-            bucket_name = os.environ["BUCKET_NAME"]
-            bucket = s3.Bucket(bucket_name)
-            for obj in bucket.objects.all():
-              print(obj.key)
-      Environment:
-        Variables:
-          BUCKET_NAME: !Ref S3Bucket
-      Handler: "index.handler"
-      Role: !GetAtt IamRole.Arn
-      Runtime: "python3.14"
-      Timeout: 60
-    Type: "AWS::Lambda::Function"
-
-  S3Bucket:
-    DependsOn: SqsQueuePolicy
-    Properties:
-      # BucketName: "ex-buck-fred"
-      NotificationConfiguration:
-        QueueConfigurations: 
-          - Event: "s3:ObjectCreated:*"
-            Filter:
-              S3Key:
-                Rules:
-                  - Name: "suffix"
-                    Value: ".jpg"
-            Queue: !GetAtt SqsQueue.Arn
-          - Event: "s3:ObjectCreated:*"
-            Filter:
-              S3Key:
-                Rules:
-                  - Name: "suffix"
-                    Value: ".png"
-            Queue: !GetAtt SqsQueue.Arn
-    Type: "AWS::S3::Bucket"
+      Parameters:
+        SqsQueueArn: !GetAtt SqsStack.Outputs.SqsQueueArn
+      TemplateURL: "./templates/S3.yaml"
+    Type: "AWS::CloudFormation::Stack"
   
-  SqsQueue:
-    Properties: 
-      # FifoQueue: true
-      # QueueName: "test-fred.fifo"
-      VisibilityTimeout: 360
-    Type: "AWS::SQS::Queue"
-
-  SqsQueuePolicy:
-    Properties: 
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          Action: 
-            - "SQS:SendMessage"
-          Condition:
-            ArnLike:
-              aws:SourceArn: !Sub "arn:${AWS::Partition}:s3:::*s3bucket*"
-            StringEquals:
-              aws:SourceAccount: !Ref AWS::AccountId
-          Effect: "Allow"
-          Principal:
-            Service: "s3.amazonaws.com"
-          Resource: !GetAtt SqsQueue.Arn
-      Queues: 
-        - !Ref SqsQueue
-    Type: "AWS::SQS::QueuePolicy"
+  SqsStack:
+    Properties:
+      TemplateURL: "./templates/sqs.yaml"
+    Type: "AWS::CloudFormation::Stack"

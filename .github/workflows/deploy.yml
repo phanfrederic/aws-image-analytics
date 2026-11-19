@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+env:
+  CLOUDFORMATION_STACK_NAME: "image-stack"
+  S3_BUCKET_NAME: "fred-pkg-tmp"
+  TEMPLATE_FILE_NAME: "main.yaml"
+
 permissions:
   contents: read
   id-token: write
@@ -24,9 +29,15 @@ jobs:
           aws-region: eu-west-3
           role-to-assume: arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction
 
+      - name: Package CloudFormation template
+        run: |
+          aws cloudformation package \
+            --s3-bucket ${{ env.S3_BUCKET_NAME }} \
+            --template-file ${{ env.TEMPLATE_FILE_NAME }}
+
       - name: Deploy CloudFormation stack
         run: |
           aws cloudformation deploy \
             --capabilities CAPABILITY_NAMED_IAM \
-            --stack-name image-stack \
-            --template-file cfn.yaml
+            --stack-name ${{ env.CLOUDFORMATION_STACK_NAME }} \
+            --template-file ${{ env.TEMPLATE_FILE_NAME }}

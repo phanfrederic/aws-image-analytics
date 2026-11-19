@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  SqsQueueArn:
+    Type: String
+
+Resources:
+  S3Bucket:
+    DependsOn: SqsQueuePolicy
+    Properties:
+      NotificationConfiguration:
+        QueueConfigurations: 
+          - Event: "s3:ObjectCreated:*"
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: "suffix"
+                    Value: ".jpg"
+            Queue: !Ref SqsQueueArn
+          - Event: "s3:ObjectCreated:*"
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: "suffix"
+                    Value: ".png"
+            Queue: !Ref SqsQueueArn
+    Type: "AWS::S3::Bucket"
+
+Outputs:
+  S3BucketArn:
+    Value: !GetAtt S3Bucket.Arn
+  S3BucketName:
+    Value: !Ref S3Bucket

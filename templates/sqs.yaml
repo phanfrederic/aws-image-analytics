@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Resources:
+  SqsQueue:
+    Properties: 
+      # FifoQueue: true
+      # QueueName: "test-fred.fifo"
+      VisibilityTimeout: 360
+    Type: "AWS::SQS::Queue"
+
+  SqsQueuePolicy:
+    Properties: 
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          Action: 
+            - "SQS:SendMessage"
+          Condition:
+            ArnLike:
+              aws:SourceArn: !Sub "arn:${AWS::Partition}:s3:::*s3bucket*"
+            StringEquals:
+              aws:SourceAccount: !Ref AWS::AccountId
+          Effect: "Allow"
+          Principal:
+            Service: "s3.amazonaws.com"
+          Resource: !GetAtt SqsQueue.Arn
+      Queues: 
+        - !Ref SqsQueue
+    Type: "AWS::SQS::QueuePolicy"
+
+Outputs:
+  SqsQueueArn: 
+    Value: !GetAtt SqsQueue.Arn
