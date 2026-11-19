@@ -33,7 +33,6 @@ Resources:
                 Resource:
                   - !GetAtt SqsQueue.Arn
             Version: "2012-10-17"
-
     Type: "AWS::IAM::Role"
 
   LambdaEventSourceMapping:
@@ -48,7 +47,7 @@ Resources:
         ZipFile: |
           import boto3
           import os
-          
+
           def handler(event, context):
             s3 = boto3.resource("s3")
             bucket_name = os.environ["BUCKET_NAME"]
