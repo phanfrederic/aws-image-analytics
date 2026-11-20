@@ -25,7 +25,7 @@ Resources:
           Principal:
             Service: "s3.amazonaws.com"
           Resource: !GetAtt SqsQueue.Arn
-          Version: "2012-10-17"
+        Version: "2012-10-17"
       Queues: 
         - !Ref SqsQueue
     Type: "AWS::SQS::QueuePolicy"
