@@ -6,16 +6,13 @@ Outputs:
 
 Resources:
   SqsQueue:
-    Properties: 
-      # FifoQueue: true
-      # QueueName: "test-fred.fifo"
+    Properties:
       VisibilityTimeout: 360
     Type: "AWS::SQS::Queue"
 
   SqsQueuePolicy:
     Properties: 
       PolicyDocument:
-        Version: "2012-10-17"
         Statement:
           Action: 
             - "SQS:SendMessage"
@@ -28,6 +25,7 @@ Resources:
           Principal:
             Service: "s3.amazonaws.com"
           Resource: !GetAtt SqsQueue.Arn
+          Version: "2012-10-17"
       Queues: 
         - !Ref SqsQueue
     Type: "AWS::SQS::QueuePolicy"

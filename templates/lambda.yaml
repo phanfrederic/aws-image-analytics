@@ -17,14 +17,13 @@ Resources:
             - "sts:AssumeRole"
           Effect: "Allow"
           Principal:
-            Service: 
+            Service:
               - "lambda.amazonaws.com"
         Version: "2012-10-17"
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
       Policies:
-        - PolicyName: "S3AndSQSAccessPolicy"
-          PolicyDocument: 
+        - PolicyDocument:
             Statement:
               - Action:
                   - "s3:GetObject"
@@ -40,6 +39,7 @@ Resources:
                 Resource:
                   - !Ref SqsQueueArn
             Version: "2012-10-17"
+          PolicyName: "LambdaS3SqsAccessPolicy"
     Type: "AWS::IAM::Role"
 
   LambdaEventSourceMapping:
