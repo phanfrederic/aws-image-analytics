@@ -1,11 +1,9 @@
-name: "Undeploy CloudFormation stack(s)"
-
 env:
   ROOT_STACK_NAME_LIST: "image-analytics-deploy-stack image-analytics-prepare-stack"
 
 jobs:
   prepare:
-    if: ${{ github.event.inputs.confirmation,, == "undeploy" }}
+    if: inputs.confirmation == 'undeploy'
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credential

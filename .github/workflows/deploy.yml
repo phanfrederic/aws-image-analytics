@@ -1,5 +1,3 @@
-name: "Deploy CloudFormation stack(s)"
-
 env:
   DEPLOY_STACK_NAME: "image-analytics-deploy-stack"
   PREPARE_STACK_NAME: "image-analytics-prepare-stack"
