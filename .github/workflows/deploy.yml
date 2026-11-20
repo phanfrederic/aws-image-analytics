@@ -32,7 +32,7 @@ jobs:
       - name: Deploy artifact bucket
         run: |
           aws cloudformation deploy \
-            --stack-name ${{ PREPARE_STACK_NAME }} \
+            --stack-name ${{ env.PREPARE_STACK_NAME }} \
             --template-file templates/bootstrap.yaml
 
       - id: get-artifact-bucket-name
@@ -41,7 +41,7 @@ jobs:
           bucket_name=$(aws cloudformation describe-stacks \
             --output text \
             --query "Stacks[0].Outputs[?OutputKey=='S3BucketName'].OutputValue" \
-            --stack-name ${{ PREPARE_STACK_NAME }})
+            --stack-name ${{ env.PREPARE_STACK_NAME }})
           echo "bucket-name=$bucket_name" >> $GITHUB_OUTPUT
 
   deploy:
@@ -68,5 +68,5 @@ jobs:
         run: |
           aws cloudformation deploy \
             --capabilities CAPABILITY_NAMED_IAM \
-            --stack-name ${{ DEPLOY_STACK_NAME }} \
+            --stack-name ${{ env.DEPLOY_STACK_NAME }} \
             --template-file packaged-main.yaml
