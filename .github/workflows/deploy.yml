@@ -31,7 +31,7 @@ jobs:
         run: |
           aws cloudformation deploy \
             --stack-name cfn-bootstrap-stack \
-            --template-file bootstrap.yaml
+            --template-file templates/bootstrap.yaml
 
       - id: get-artifact-bucket-name
         name: Get artifact bucket name
