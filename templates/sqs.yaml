@@ -25,8 +25,7 @@ Resources:
             - "SQS:SendMessage"
           Condition:
             ArnLike:
-              # aws:SourceArn: !Sub "arn:${AWS::Partition}:s3:::*s3bucket*"
-              aws:SourceArn: !Ref S3BucketArn
+              aws:SourceArn: !Sub "arn:${AWS::Partition}:s3:::*s3bucket*"
             StringEquals:
               aws:SourceAccount: !Ref AWS::AccountId
           Effect: "Allow"
