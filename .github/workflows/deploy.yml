@@ -5,20 +5,47 @@ on:
     branches:
       - main
 
-env:
-  CLOUDFORMATION_STACK_NAME: "image-stack"
-  S3_BUCKET_NAME: "fred-pkg-tmp"
+# env:
+#   CLOUDFORMATION_STACK_NAME: "image-stack"
 
 permissions:
   contents: read
   id-token: write
 
 jobs:
+  prepare:
+    outputs:
+      artifact_bucket_name: ${{ steps.get-artifact-bucket-name.outputs.artifact-bucket-name }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Configure AWS credential
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: eu-west-3
+          role-to-assume: arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction
+
+      - name: Deploy artifact bucket
+        run: |
+          aws cloudformation deploy \
+            --stack-name cfn-bootstrap-stack \
+            --template-file bootstrap.yaml
+
+      - id: get-artifact-bucket-name
+        name: Get artifact bucket name
+        run: |
+          bucket_name=
+            $(aws cloudformation describe-stacks \
+                --output text \
+                --query "Stacks[0].Outputs[?OutputKey=='S3BucketName'].OutputValue" \
+                --stack-name cfn-bootstrap-stack)
+          echo "artifact-bucket-name=$bucket_name" >> $GITHUB_OUTPUT
+
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-
       - name: Check out repository
         uses: actions/checkout@v7
 
@@ -32,12 +59,12 @@ jobs:
         run: |
           aws cloudformation package \
             --output-template-file packaged-main.yaml \
-            --s3-bucket ${{ env.S3_BUCKET_NAME }} \
+            --s3-bucket ${{ needs.prepare.outputs.artifact_bucket_name }} \
             --template-file main.yaml
 
       - name: Deploy CloudFormation stack
         run: |
           aws cloudformation deploy \
             --capabilities CAPABILITY_NAMED_IAM \
-            --stack-name ${{ env.CLOUDFORMATION_STACK_NAME }} \
+            --stack-name image-stack \
             --template-file packaged-main.yaml
