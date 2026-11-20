@@ -1,0 +1,24 @@
+name: "Undeploy CloudFormation stack"
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type 'undeploy' to confirm deleting all stack(s)"
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  undeploy:
+    if: ${{ github.event.inputs.confirm == 'undeploy' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credential
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: eu-west-3
+          role-to-assume: arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction
+
