@@ -4,10 +4,6 @@ Outputs:
   SqsQueueArn: 
     Value: !GetAtt SqsQueue.Arn
 
-Parameters:
-  S3BucketArn:
-    Type: String
-
 Resources:
   SqsQueue:
     Properties: 
