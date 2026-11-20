@@ -36,11 +36,10 @@ jobs:
       - id: get-artifact-bucket-name
         name: Get artifact bucket name
         run: |
-          bucket_name=\
-            $(aws cloudformation describe-stacks \
-                --output text \
-                --query "Stacks[0].Outputs[?OutputKey=='S3BucketName'].OutputValue" \
-                --stack-name cfn-bootstrap-stack)
+          bucket_name=$(aws cloudformation describe-stacks \
+            --output text \
+            --query "Stacks[0].Outputs[?OutputKey=='S3BucketName'].OutputValue" \
+            --stack-name cfn-bootstrap-stack)
           echo "artifact-bucket-name=$bucket_name" >> $GITHUB_OUTPUT
 
   deploy:
