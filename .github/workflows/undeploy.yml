@@ -22,9 +22,9 @@ jobs:
             fi
 
             nested_stack_list=$(aws cloudformation list-stack-resources \
-              ---output text \
-              ---query "StackResourceSummaries[?ResourceType=='AWS::CloudFormation::Stack'].PhysicalResourceId" \
-              ---stack-name "$stack_name"
+              --output text \
+              --query "StackResourceSummaries[?ResourceType=='AWS::CloudFormation::Stack'].PhysicalResourceId" \
+              --stack-name "$stack_name"
             )
 
             for target in $stack_name $nested_stack_list; do
