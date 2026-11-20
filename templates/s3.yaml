@@ -1,5 +1,11 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
+Outputs:
+  S3BucketArn:
+    Value: !GetAtt S3Bucket.Arn
+  S3BucketName:
+    Value: !Ref S3Bucket
+
 Parameters:
   SqsQueueArn:
     Type: String
@@ -24,9 +30,3 @@ Resources:
                     Value: ".png"
             Queue: !Ref SqsQueueArn
     Type: "AWS::S3::Bucket"
-
-Outputs:
-  S3BucketArn:
-    Value: !GetAtt S3Bucket.Arn
-  S3BucketName:
-    Value: !Ref S3Bucket

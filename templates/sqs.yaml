@@ -1,5 +1,13 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
+Outputs:
+  SqsQueueArn: 
+    Value: !GetAtt SqsQueue.Arn
+
+Parameters:
+  S3BucketArn:
+    Type: String
+
 Resources:
   SqsQueue:
     Properties: 
@@ -17,7 +25,8 @@ Resources:
             - "SQS:SendMessage"
           Condition:
             ArnLike:
-              aws:SourceArn: !Sub "arn:${AWS::Partition}:s3:::*s3bucket*"
+              # aws:SourceArn: !Sub "arn:${AWS::Partition}:s3:::*s3bucket*"
+              aws:SourceArn: !Ref S3BucketArn
             StringEquals:
               aws:SourceAccount: !Ref AWS::AccountId
           Effect: "Allow"
@@ -27,7 +36,3 @@ Resources:
       Queues: 
         - !Ref SqsQueue
     Type: "AWS::SQS::QueuePolicy"
-
-Outputs:
-  SqsQueueArn: 
-    Value: !GetAtt SqsQueue.Arn
