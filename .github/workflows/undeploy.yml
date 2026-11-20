@@ -1,11 +1,11 @@
-name: "Undeploy CloudFormation stack"
+name: "Undeploy CloudFormation stack(s)"
 
 env:
-  UNDEPLOY_STACK_LIST: "image-analytics-deploy-stack image-analytics-prepare-stack"
+  ROOT_STACK_NAME_LIST: "image-analytics-deploy-stack image-analytics-prepare-stack"
 
 jobs:
   prepare:
-    if: ${{ github.event.inputs.confirm == 'undeploy' }}
+    if: ${{ github.event.inputs.confirmation,, == "undeploy" }}
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credential
@@ -13,29 +13,29 @@ jobs:
         with:
           aws-region: eu-west-3
           role-to-assume: arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction
-  
+
       - name: Empty S3 bucket(s)
         run: |
-          for stack_name in ${{ env.UNDEPLOY_STACK_LIST }}; do
-            if ! aws cloudformation describe-stacks --stack-name "$stack_name" > /dev/null 2>&1; then
+          for root_stack_name in $ROOT_STACK_NAME_LIST; do
+            if ! aws cloudformation describe-stacks --stack-name "$root_stack_name" > /dev/null 2>&1; then
               continue
             fi
 
-            nested_stack_list=$(aws cloudformation list-stack-resources \
+            nested_stack_name_list=$(aws cloudformation list-stack-resources \
               --output text \
               --query "StackResourceSummaries[?ResourceType=='AWS::CloudFormation::Stack'].PhysicalResourceId" \
-              --stack-name "$stack_name"
+              --stack-name "$root_stack_name"
             )
 
-            for target in $stack_name $nested_stack_list; do
-              bucket_list=$(aws cloudformation list-stack-resources \
+            for stack_name in $root_stack_name $nested_stack_name_list; do
+              bucket_name_list=$(aws cloudformation list-stack-resources \
                 --output text \
                 --query "StackResourceSummaries[?ResourceType=='AWS::S3::Bucket'].PhysicalResourceId" \
-                --stack-name "$target"
+                --stack-name "$stack_name"
               )
 
-              for bucket in $bucket_list; do
-                aws s3 rm s3://$bucket --recursive
+              for bucket_name in $bucket_name_list; do
+                aws s3 rm s3://$bucket_name --recursive
               done
             done
           done
@@ -52,19 +52,19 @@ jobs:
       
       - name: Undeploy CloudFormation stack(s)
         run: |
-          for stack_name in ${{ env.UNDEPLOY_STACK_LIST }}; do
-            if ! aws cloudformation describe-stacks --stack-name "$stack_name" > /dev/null 2>&1; then
+          for root_stack_name in $ROOT_STACK_NAME_LIST; do
+            if ! aws cloudformation describe-stacks --stack-name "$root_stack_name" > /dev/null 2>&1; then
               continue
             fi
 
-            aws cloudformation delete-stack --stack-name "$stack_name"
-            aws cloudformation wait stack-delete-complete --stack-name "$stack_name"
+            aws cloudformation delete-stack --stack-name "$root_stack_name"
+            aws cloudformation wait stack-delete-complete --stack-name "$root_stack_name"
           done
 
 on:
   workflow_dispatch:
     inputs:
-      confirm:
+      confirmation:
         description: "Type 'undeploy' to confirm deleting all stack(s)"
         required: true
 

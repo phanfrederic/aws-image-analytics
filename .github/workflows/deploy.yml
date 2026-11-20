@@ -1,4 +1,4 @@
-name: "Deploy CloudFormation stack"
+name: "Deploy CloudFormation stack(s)"
 
 env:
   DEPLOY_STACK_NAME: "image-analytics-deploy-stack"
@@ -7,12 +7,9 @@ env:
 jobs:
   prepare:
     outputs:
-      artifact-bucket-name: ${{ steps.get-artifact-bucket-name.outputs.bucket-name }}
+      artifact-bucket-name: ${{ steps.get-artifact-bucket-name.outputs.artifact-bucket-name }}
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-
       - name: Configure AWS credential
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -22,17 +19,17 @@ jobs:
       - name: Deploy artifact bucket
         run: |
           aws cloudformation deploy \
-            --stack-name ${{ env.PREPARE_STACK_NAME }} \
+            --stack-name $PREPARE_STACK_NAME \
             --template-file templates/bootstrap.yaml
 
       - id: get-artifact-bucket-name
         name: Get artifact bucket name
         run: |
-          bucket_name=$(aws cloudformation describe-stacks \
+          artifact_bucket_name=$(aws cloudformation describe-stacks \
             --output text \
             --query "Stacks[0].Outputs[?OutputKey=='S3BucketName'].OutputValue" \
-            --stack-name ${{ env.PREPARE_STACK_NAME }})
-          echo "bucket-name=$bucket_name" >> $GITHUB_OUTPUT
+            --stack-name $PREPARE_STACK_NAME)
+          echo "artifact-bucket-name=$artifact_bucket_name" >> $GITHUB_OUTPUT
 
   deploy:
     needs: prepare
@@ -58,7 +55,7 @@ jobs:
         run: |
           aws cloudformation deploy \
             --capabilities CAPABILITY_NAMED_IAM \
-            --stack-name ${{ env.DEPLOY_STACK_NAME }} \
+            --stack-name $DEPLOY_STACK_NAME \
             --template-file packaged-main.yaml
 
 on:
