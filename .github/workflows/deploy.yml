@@ -36,7 +36,7 @@ jobs:
       - id: get-artifact-bucket-name
         name: Get artifact bucket name
         run: |
-          bucket_name=
+          bucket_name= \
             $(aws cloudformation describe-stacks \
                 --output text \
                 --query "Stacks[0].Outputs[?OutputKey=='S3BucketName'].OutputValue" \
