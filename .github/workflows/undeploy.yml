@@ -3,17 +3,6 @@ name: "Undeploy CloudFormation stack"
 env:
   UNDEPLOY_STACK_LIST: "image-analytics-deploy-stack image-analytics-prepare-stack"
 
-on:
-  workflow_dispatch:
-    inputs:
-      confirm:
-        description: "Type 'undeploy' to confirm deleting all stack(s)"
-        required: true
-
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
   prepare:
     if: ${{ github.event.inputs.confirm == 'undeploy' }}
@@ -63,3 +52,14 @@ jobs:
             aws cloudformation delete-stack --stack-name "$stack_name"
             aws cloudformation wait stack-delete-complete --stack-name "$stack_name"
           done
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type 'undeploy' to confirm deleting all stack(s)"
+        required: true
+
+permissions:
+  contents: read
+  id-token: write

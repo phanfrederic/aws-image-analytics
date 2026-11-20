@@ -4,16 +4,6 @@ env:
   DEPLOY_STACK_NAME: "image-analytics-deploy-stack"
   PREPARE_STACK_NAME: "image-analytics-prepare-stack"
 
-on:
-  push:
-    branches:
-      - main
-
-
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
   prepare:
     outputs:
@@ -70,3 +60,12 @@ jobs:
             --capabilities CAPABILITY_NAMED_IAM \
             --stack-name ${{ env.DEPLOY_STACK_NAME }} \
             --template-file packaged-main.yaml
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
