@@ -1,5 +1,8 @@
 name: "Undeploy CloudFormation stack"
 
+env:
+  UNDEPLOY_STACK_LIST: "image-analytics-deploy-stack image-analytics-prepare-stack"
+
 on:
   workflow_dispatch:
     inputs:
@@ -12,7 +15,7 @@ permissions:
   id-token: write
 
 jobs:
-  undeploy:
+  prepare:
     if: ${{ github.event.inputs.confirm == 'undeploy' }}
     runs-on: ubuntu-latest
     steps:
@@ -21,4 +24,42 @@ jobs:
         with:
           aws-region: eu-west-3
           role-to-assume: arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction
+  
+      - name: Empty S3 bucket(s)
+        run: |
+          for stack_name in $env.UNDEPLOY_STACK_LIST; do
+            if !aws cloudformation describe-stacks --stack-name "$stack_name" > /dev/null 2>&1; then
+              continue
+            fi
 
+            bucket_list=$(aws cloudformation list-stack-resources \
+              --output text \
+              --query "StackResourceSummaries[?ResourceType=='AWS::S3::Bucket'].PhysicalResourceId" \
+              --stack-name "$stack_name"
+            )
+
+            for bucket in $bucket_list; do
+              aws s3 rm s3://bucket --recursive
+            done
+          done
+
+  undeploy:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credential
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: eu-west-3
+          role-to-assume: arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction
+      
+      - name: Undeploy stack(s)
+        run: |
+          for stack_name in $env.UNDEPLOY_STACK_LIST; do
+            if !aws cloudformation describe-stacks --stack-name "$stack_name" > /dev/null 2>&1; then
+              continue
+            fi
+
+            aws cloudformation delete-stack --stack-name "$stack_name"
+            aws cloudformation wait stack-delete-complete --stack-name "$stack_name"
+          done
