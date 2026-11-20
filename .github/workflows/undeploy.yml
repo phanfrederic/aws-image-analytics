@@ -21,14 +21,22 @@ jobs:
               continue
             fi
 
-            bucket_list=$(aws cloudformation list-stack-resources \
-              --output text \
-              --query "StackResourceSummaries[?ResourceType=='AWS::S3::Bucket'].PhysicalResourceId" \
-              --stack-name "$stack_name"
+            nested_stack_list=$(aws cloudformation list-stack-resources \
+              ---output text \
+              ---query "StackResourceSummaries[?ResourceType=='AWS::CloudFormation::Stack'].PhysicalResourceId" \
+              ---stack-name "$stack_name"
             )
 
-            for bucket in $bucket_list; do
-              aws s3 rm s3://$bucket --recursive
+            for target in $stack_name $nested_stack_list; do
+              bucket_list=$(aws cloudformation list-stack-resources \
+                --output text \
+                --query "StackResourceSummaries[?ResourceType=='AWS::S3::Bucket'].PhysicalResourceId" \
+                --stack-name "$target"
+              )
+
+              for bucket in $bucket_list; do
+                aws s3 rm s3://$bucket --recursive
+              done
             done
           done
 
