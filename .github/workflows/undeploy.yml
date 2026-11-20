@@ -28,7 +28,7 @@ jobs:
       - name: Empty S3 bucket(s)
         run: |
           for stack_name in ${{ env.UNDEPLOY_STACK_LIST }}; do
-            if !aws cloudformation describe-stacks --stack-name "$stack_name" > /dev/null 2>&1; then
+            if ! aws cloudformation describe-stacks --stack-name "$stack_name" > /dev/null 2>&1; then
               continue
             fi
 
@@ -39,7 +39,7 @@ jobs:
             )
 
             for bucket in $bucket_list; do
-              aws s3 rm s3://bucket --recursive
+              aws s3 rm s3://$bucket --recursive
             done
           done
 
@@ -56,7 +56,7 @@ jobs:
       - name: Undeploy stack(s)
         run: |
           for stack_name in ${{ env.UNDEPLOY_STACK_LIST }}; do
-            if !aws cloudformation describe-stacks --stack-name "$stack_name" > /dev/null 2>&1; then
+            if ! aws cloudformation describe-stacks --stack-name "$stack_name" > /dev/null 2>&1; then
               continue
             fi
 
