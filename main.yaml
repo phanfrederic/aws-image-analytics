@@ -7,7 +7,7 @@ Resources:
         S3BucketArn: !GetAtt S3Stack.Outputs.S3BucketArn
         S3BucketName: !GetAtt S3Stack.Outputs.S3BucketName
         SqsQueueArn: !GetAtt SqsStack.Outputs.SqsQueueArn
-      TemplateURL: "templates/lambda.yaml"
+      TemplateURL: "./templates/lambda.yaml"
     Type: "AWS::CloudFormation::Stack"
 
   S3Stack:
@@ -15,10 +15,10 @@ Resources:
     Properties:
       Parameters:
         SqsQueueArn: !GetAtt SqsStack.Outputs.SqsQueueArn
-      TemplateURL: "templates/s3.yaml"
+      TemplateURL: "./templates/s3.yaml"
     Type: "AWS::CloudFormation::Stack"
   
   SqsStack:
     Properties:
-      TemplateURL: "templates/sqs.yaml"
+      TemplateURL: "./templates/sqs.yaml"
     Type: "AWS::CloudFormation::Stack"

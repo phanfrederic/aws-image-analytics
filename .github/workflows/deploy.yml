@@ -10,6 +10,9 @@ jobs:
       artifact-bucket-name: ${{ steps.get-artifact-bucket-name.outputs.artifact-bucket-name }}
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
       - name: Configure AWS credential
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -20,7 +23,7 @@ jobs:
         run: |
           aws cloudformation deploy \
             --stack-name $PREPARE_STACK_NAME \
-            --template-file templates/bootstrap.yaml
+            --template-file ./templates/bootstrap.yaml
 
       - id: get-artifact-bucket-name
         name: Get artifact bucket name
@@ -47,16 +50,16 @@ jobs:
       - name: Package CloudFormation template
         run: |
           aws cloudformation package \
-            --output-template-file packaged-main.yaml \
+            --output-template-file ./packaged-main.yaml \
             --s3-bucket ${{ needs.prepare.outputs.artifact-bucket-name }} \
-            --template-file main.yaml
+            --template-file ./main.yaml
 
       - name: Deploy CloudFormation stack
         run: |
           aws cloudformation deploy \
             --capabilities CAPABILITY_NAMED_IAM \
             --stack-name $DEPLOY_STACK_NAME \
-            --template-file packaged-main.yaml
+            --template-file ./packaged-main.yaml
 
 on:
   push:
