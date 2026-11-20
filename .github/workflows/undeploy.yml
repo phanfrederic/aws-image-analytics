@@ -50,7 +50,7 @@ jobs:
           aws-region: eu-west-3
           role-to-assume: arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction
       
-      - name: Undeploy stack(s)
+      - name: Undeploy CloudFormation stack(s)
         run: |
           for stack_name in ${{ env.UNDEPLOY_STACK_LIST }}; do
             if ! aws cloudformation describe-stacks --stack-name "$stack_name" > /dev/null 2>&1; then
