@@ -1,4 +1,5 @@
 env:
+  AWS_DEPLOYMENT_REGION: "eu-west-1"
   DEPLOY_STACK_NAME: "image-analytics-deploy-stack"
   PREPARE_STACK_NAME: "image-analytics-prepare-stack"
 
@@ -14,7 +15,7 @@ jobs:
       - name: Configure AWS credential
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-region: eu-west-3
+          aws-region: $AWS_DEPLOYMENT_REGION
           role-to-assume: arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction
 
       - name: Deploy artifact bucket
@@ -42,7 +43,7 @@ jobs:
       - name: Configure AWS credential
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-region: eu-west-3
+          aws-region: $AWS_DEPLOYMENT_REGION
           role-to-assume: arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction
 
       - name: Package CloudFormation template

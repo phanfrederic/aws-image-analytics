@@ -1,4 +1,5 @@
 env:
+  AWS_DEPLOYMENT_REGION: "eu-west-1"
   ROOT_STACK_NAME_LIST: "image-analytics-deploy-stack image-analytics-prepare-stack"
 
 jobs:
@@ -9,7 +10,7 @@ jobs:
       - name: Configure AWS credential
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-region: eu-west-3
+          aws-region: AWS_DEPLOYMENT_REGION
           role-to-assume: arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction
 
       - name: Empty S3 bucket(s)
@@ -45,7 +46,7 @@ jobs:
       - name: Configure AWS credential
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-region: eu-west-3
+          aws-region: AWS_DEPLOYMENT_REGION
           role-to-assume: arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction
       
       - name: Undeploy CloudFormation stack(s)
