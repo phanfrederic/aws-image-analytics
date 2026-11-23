@@ -1,0 +1,17 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Outputs:
+  DynamoDbTableArn:
+    Value: !GetAtt DynamoDbTable.Arn
+
+Resources:
+  DynamoDbTable:
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "ObjectKey"
+          AttributeType: "S"
+      BillingMode: "PAY_PER_REQUEST"
+      KeySchema:
+        - AttributeName: "ObjectKey"
+          KeyType: "HASH"
+    Type: "AWS::DynamoDB::Table"

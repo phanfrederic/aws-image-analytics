@@ -1,6 +1,8 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
 Parameters:
+  DynamoDbTableArn:
+    Type: String
   S3BucketArn:
     Type: String
   S3BucketName:
@@ -25,6 +27,11 @@ Resources:
       Policies:
         - PolicyDocument:
             Statement:
+              - Action: 
+                  - "dynamodb:PutItem"
+                Effect: "Allow"
+                Resource:
+                  - !Ref DynamoDbTableArn
               - Action:
                   - "s3:GetObject"
                 Effect: "Allow"
