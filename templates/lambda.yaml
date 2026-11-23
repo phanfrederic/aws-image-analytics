@@ -69,8 +69,8 @@ Resources:
                 bucket = record2["s3"]["bucket"]["name"]
                 key = urllib.parse.unquote_plus(record2["s3"]["object"]["key"])
 
-                print(bucket)
-                print(key)
+                print(f"Rekognition Region: {rekognition.meta.region_name}")
+                print(f"Target Bucket: {bucket} | Decoded Key: {key}")
 
                 reko_response = rekognition.detect_labels(
                   Image = {
