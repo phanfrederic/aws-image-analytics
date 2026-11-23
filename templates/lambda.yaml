@@ -3,6 +3,8 @@ AWSTemplateFormatVersion: "2010-09-09"
 Parameters:
   DynamoDbTableArn:
     Type: String
+  DynamoDbTableName:
+    Type: String
   S3BucketArn:
     Type: String
   S3BucketName:
@@ -63,12 +65,17 @@ Resources:
       Code: 
         ZipFile: |
           import boto3
+          import datetime
+          import decimal
           import json
+          import os
           import urllib
 
-          def handler(event, context):
-            rekognition_client = boto3.client("rekognition")
+          dynamodb_client = boto3.resource("dynamodb")
+          dynamodb_table = dynamodb_client.Table(os.environ["TABLE_NAME"])
+          rekognition_client = boto3.client("rekognition")
 
+          def handler(event, context):
             for sqs_record in event.get("Records", []):
               s3_event = json.loads(sqs_record["body"])
 
@@ -87,7 +94,26 @@ Resources:
                   MinConfidence = 80
                 )
 
+                label_list = [
+                  {
+                    "LabelName": label["Name"], 
+                    "LabelConfidence": decimal.Decimal(str(round(label["Confidence"], 2)))
+                  } 
+                  for label in rekognition_response["Labels"]
+                ]
+
+                dynamodb_table.put_item(
+                  Item = {
+                    "ObjectKey": object_key,
+                    "UploadTime": datetime.datetime.now(datetime.UTC).isoformat(),
+                    "ImageLabel": label_list
+                  }
+                )
+
             return {'statusCode': 200}
+      Environment:
+        variables:
+          TABLE_NAME: 
       Handler: "index.handler"
       Role: !GetAtt IamRole.Arn
       Runtime: "python3.14"

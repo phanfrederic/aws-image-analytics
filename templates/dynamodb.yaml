@@ -3,6 +3,8 @@ AWSTemplateFormatVersion: "2010-09-09"
 Outputs:
   DynamoDbTableArn:
     Value: !GetAtt DynamoDbTable.Arn
+  DynamoDbTableName:
+    Value: !Ref DynamoDbTable
 
 Resources:
   DynamoDbTable:
