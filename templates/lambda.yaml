@@ -56,6 +56,8 @@ Resources:
           import os
 
           def handler(event, context):
+            print(event)
+            print(context)
             s3 = boto3.resource("s3")
             bucket_name = os.environ["BUCKET_NAME"]
             bucket = s3.Bucket(bucket_name)
