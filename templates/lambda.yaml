@@ -67,12 +67,16 @@ Resources:
 
               for record2 in body.get("Records", []):
                 bucket = record2["s3"]["bucket"]["name"]
-                key = record2["s3"]["object"]["key"]
+                key = urllib.parse.unquote_plus(record2["s3"]["object"]["key"])
+
+                print(bucket)
+                print(key)
+
                 reko_response = rekognition.detect_labels(
                   Image = {
                     "S3Object": {
                       "Bucket": bucket,
-                      "Name": urllib.parse.unquote_plus(key)
+                      "Name": key
                     }
                   },
                   MaxLabels = 10,
