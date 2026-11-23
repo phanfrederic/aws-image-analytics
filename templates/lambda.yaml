@@ -112,8 +112,8 @@ Resources:
 
             return {'statusCode': 200}
       Environment:
-        variables:
-          TABLE_NAME: 
+        Variables:
+          TABLE_NAME: DynamoDbTableName
       Handler: "index.handler"
       Role: !GetAtt IamRole.Arn
       Runtime: "python3.14"
