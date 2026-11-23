@@ -58,6 +58,8 @@ Resources:
     Properties:
       EventSourceArn: !Ref SqsQueueArn
       FunctionName: !Ref LambdaFunction
+      FunctionResponseTypes:
+        - ReportBatchItemFailures
     Type: "AWS::Lambda::EventSourceMapping"
 
   LambdaFunction:
@@ -76,41 +78,52 @@ Resources:
           rekognition_client = boto3.client("rekognition")
 
           def handler(event, context):
+            item_failure_list = []
+
             for sqs_record in event.get("Records", []):
-              s3_event = json.loads(sqs_record["body"])
+              try:
+                s3_event = json.loads(sqs_record["body"])
 
-              for s3_record in s3_event.get("Records", []):
-                bucket_name = s3_record["s3"]["bucket"]["name"]
-                object_key = urllib.parse.unquote_plus(s3_record["s3"]["object"]["key"])
+                for s3_record in s3_event.get("Records", []):
+                  bucket_name = s3_record["s3"]["bucket"]["name"]
+                  object_key = urllib.parse.unquote_plus(s3_record["s3"]["object"]["key"])
 
-                rekognition_response = rekognition_client.detect_labels(
-                  Image = {
-                    "S3Object": {
-                      "Bucket": bucket_name,
-                      "Name": object_key
+                  rekognition_response = rekognition_client.detect_labels(
+                    Image = {
+                      "S3Object": {
+                        "Bucket": bucket_name,
+                        "Name": object_key
+                      }
+                    },
+                    MaxLabels = 10,
+                    MinConfidence = 80
+                  )
+
+                  label_list = [
+                    {
+                      "LabelName": label["Name"], 
+                      "LabelConfidence": decimal.Decimal(str(round(label["Confidence"], 2)))
+                    } 
+                    for label in rekognition_response["Labels"]
+                  ]
+
+                  dynamodb_table.put_item(
+                    Item = {
+                      "ObjectKey": object_key,
+                      "UploadTime": datetime.datetime.now(datetime.UTC).isoformat(),
+                      "ImageLabel": label_list
                     }
-                  },
-                  MaxLabels = 10,
-                  MinConfidence = 80
-                )
+                  )
 
-                label_list = [
+              except Exception as e : 
+                item_failure_list.append(
                   {
-                    "LabelName": label["Name"], 
-                    "LabelConfidence": decimal.Decimal(str(round(label["Confidence"], 2)))
-                  } 
-                  for label in rekognition_response["Labels"]
-                ]
-
-                dynamodb_table.put_item(
-                  Item = {
-                    "ObjectKey": object_key,
-                    "UploadTime": datetime.datetime.now(datetime.UTC).isoformat(),
-                    "ImageLabel": label_list
+                    "itemIdentifier": sqs_record["messageId"]
                   }
                 )
+            
+            return {"batchItemFailures": item_failure_list}
 
-            return {'statusCode': 200}
       Environment:
         Variables:
           TABLE_NAME: !Ref DynamoDbTableName

@@ -5,8 +5,14 @@ Outputs:
     Value: !GetAtt SqsQueue.Arn
 
 Resources:
+  DlqQueue:
+    Type: "AWS::SQS::Queue"
+
   SqsQueue:
     Properties:
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt DlqQueue.Arn
+        maxReceiveCount: 3
       VisibilityTimeout: 360
     Type: "AWS::SQS::Queue"
 
