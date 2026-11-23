@@ -28,7 +28,7 @@ Resources:
               - Action:
                   - "s3:GetObject"
                 Effect: "Allow"
-                Resource: "*"
+                Resource: !Sub "${S3BucketArn}/*"
                   # - !Ref S3BucketArn
               - Action:
                   - "sqs:DeleteMessage"
@@ -61,12 +61,6 @@ Resources:
 
           def handler(event, context):
             rekognition = boto3.client("rekognition")
-
-            try:
-              meta = s3.head_object(Bucket=bucket, Key=key)
-              print("S3 HeadObject success:", meta['ResponseMetadata']['HTTPStatusCode'])
-            except Exception as e:
-              print("S3 HeadObject failed:", str(e))
 
             for record in event.get("Records", []):
               body = json.loads(record["body"])
