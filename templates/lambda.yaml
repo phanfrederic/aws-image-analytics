@@ -76,7 +76,7 @@ Resources:
                       "Name": key
                     }
                   },
-                  MaxLabels = 10
+                  MaxLabels = 10,
                   MinConfidence = 75
                 )
                 print(reko_response)
