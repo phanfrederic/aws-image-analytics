@@ -15,7 +15,7 @@ jobs:
       - name: Configure AWS credential
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-region: $AWS_DEPLOYMENT_REGION
+          aws-region: ${{ env.AWS_DEPLOYMENT_REGION }}
           role-to-assume: arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction
 
       - name: Deploy artifact bucket
@@ -43,7 +43,7 @@ jobs:
       - name: Configure AWS credential
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-region: $AWS_DEPLOYMENT_REGION
+          aws-region: ${{ env.AWS_DEPLOYMENT_REGION }}
           role-to-assume: arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction
 
       - name: Package CloudFormation template
