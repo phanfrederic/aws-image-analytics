@@ -63,7 +63,7 @@ Resources:
             rekognition_client = boto3.client("rekognition")
 
             for sqs_record in event.get("Records", []):
-              s3_event = json.loads(sqs_record["s3_event"])
+              s3_event = json.loads(sqs_record["body"])
 
               for s3_record in s3_event.get("Records", []):
                 bucket_name = s3_record["s3"]["bucket"]["name"]
@@ -79,7 +79,7 @@ Resources:
                   MaxLabels = 10,
                   MinConfidence = 80
                 )
-                
+
             return {'statusCode': 200}
       Handler: "index.handler"
       Role: !GetAtt IamRole.Arn
