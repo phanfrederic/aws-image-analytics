@@ -43,7 +43,9 @@ jobs:
           echo "artifact-bucket-name=$artifact_bucket_name" >> $GITHUB_OUTPUT
 
   deploy:
-    needs: set-up
+    needs:
+      - prepare 
+      - set-up
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
