@@ -1,0 +1,17 @@
+{
+    "github_configuration": {
+        "assumed_role_arn": "arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction",
+        "aws_deployment_region": "eu-west-1",
+        "deploy_stack_name": "image-analytics-deploy-stack",
+        "prepare_stack_name": "image-analytics-prepare-stack"
+    },
+    "aws_parameter": {
+        "DeploymentEnvironment": "staging",
+        "LambdaRuntime": "python3.14",
+        "LambdaTimeout": 60,
+        "RekognitionMaxLabels": 10,
+        "RekognitionMinConfidence": 80,
+        "SqsRedrivePolicyMaxReceiveCount": 3,
+        "SqsVisibilityTimeout": 360
+    }
+}

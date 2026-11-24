@@ -1,10 +1,19 @@
-env:
-  AWS_DEPLOYMENT_REGION: "eu-west-1"
-  DEPLOY_STACK_NAME: "image-analytics-deploy-stack"
-  PREPARE_STACK_NAME: "image-analytics-prepare-stack"
-
 jobs:
   prepare:
+    outputs:
+      environment-configuration: ${{ steps.read-environment-configuration.outputs.environment-configuration }}
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - id: read-environment-configuration
+        name: Read environment configuration
+        run: |
+          echo "environment-configuration=$(jq -c . parameters/${{ inputs.environment }}.json)" >> $GITHUB_OUTPUT
+
+  set-up:
+    needs: prepare
     outputs:
       artifact-bucket-name: ${{ steps.get-artifact-bucket-name.outputs.artifact-bucket-name }}
     runs-on: ubuntu-latest
@@ -15,13 +24,13 @@ jobs:
       - name: Configure AWS credential
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-region: ${{ env.AWS_DEPLOYMENT_REGION }}
-          role-to-assume: arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction
+          aws-region: ${{ fromJSON(needs.prepare.outputs.environment-configuration).aws_deployment_region }}
+          role-to-assume: ${{ fromJSON(needs.prepare.outputs.environment-configuration).assumed_role_arn }}
 
       - name: Deploy artifact bucket
         run: |
           aws cloudformation deploy \
-            --stack-name $PREPARE_STACK_NAME \
+            --stack-name ${{ fromJSON(needs.prepare.outputs.environment-configuration).prepare_stack_name }} \
             --template-file ./templates/bootstrap.yaml
 
       - id: get-artifact-bucket-name
@@ -30,11 +39,11 @@ jobs:
           artifact_bucket_name=$(aws cloudformation describe-stacks \
             --output text \
             --query "Stacks[0].Outputs[?OutputKey=='S3BucketName'].OutputValue" \
-            --stack-name $PREPARE_STACK_NAME)
+            --stack-name ${{ fromJSON(needs.prepare.outputs.environment-configuration).prepare_stack_name }})
           echo "artifact-bucket-name=$artifact_bucket_name" >> $GITHUB_OUTPUT
 
   deploy:
-    needs: prepare
+    needs: set-up
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -43,21 +52,21 @@ jobs:
       - name: Configure AWS credential
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-region: ${{ env.AWS_DEPLOYMENT_REGION }}
-          role-to-assume: arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction
+          aws-region: ${{ fromJSON(needs.prepare.outputs.environment-configuration).aws_deployment_region }}
+          role-to-assume: ${{ fromJSON(needs.prepare.outputs.environment-configuration).assumed_role_arn }}
 
       - name: Package CloudFormation template
         run: |
           aws cloudformation package \
             --output-template-file ./packaged-main.yaml \
-            --s3-bucket ${{ needs.prepare.outputs.artifact-bucket-name }} \
+            --s3-bucket ${{ needs.set-up.outputs.artifact-bucket-name }} \
             --template-file ./main.yaml
 
       - name: Deploy CloudFormation stack
         run: |
           aws cloudformation deploy \
             --capabilities CAPABILITY_NAMED_IAM \
-            --stack-name $DEPLOY_STACK_NAME \
+            --stack-name ${{ fromJSON(needs.prepare.outputs.environment-configuration).deploy_stack_name }} \
             --template-file ./packaged-main.yaml
 
 on:
@@ -65,6 +74,16 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      environment:
+        default: "development"
+        description: "Choose target deployment environment"
+        options:
+          - "devlopment"
+          - "production"
+          - "staging"
+        required: true
+        type: "choice"
 
 permissions:
   contents: read
