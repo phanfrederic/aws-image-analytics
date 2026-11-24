@@ -6,7 +6,7 @@
         "prepare_stack_name": "image-analytics-prepare-stack"
     },
     "aws_parameter": {
-        "DeploymentEnvironment": "staging",
+        "DeploymentEnvironment": "development",
         "LambdaRuntime": "python3.14",
         "LambdaTimeout": 60,
         "RekognitionMaxLabels": 10,
