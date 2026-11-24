@@ -10,7 +10,7 @@ jobs:
       - id: read-environment-configuration
         name: Read environment configuration
         run: |
-          echo "environment-configuration=$(jq -c . parameters/${{ inputs.environment || 'development' }}.json)" >> $GITHUB_OUTPUT
+          echo "environment-configuration=$(jq -c '.github_configuration' parameters/${{ inputs.environment || 'development' }}.json)" >> $GITHUB_OUTPUT
 
   set-up:
     needs: prepare
