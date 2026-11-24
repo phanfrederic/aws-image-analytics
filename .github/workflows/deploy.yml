@@ -79,7 +79,7 @@ on:
         default: "development"
         description: "Choose target deployment environment"
         options:
-          - "devlopment"
+          - "development"
           - "production"
           - "staging"
         required: true
