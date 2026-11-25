@@ -62,7 +62,7 @@ jobs:
       - name: Create configuration file
         run: |
           printf "${{ needs.prepare.outputs.aws-parameter }}" > cfn-params.json
-          echo ${{ needs.prepare.outputs.aws-parameter }}
+          echo "${{ needs.prepare.outputs.aws-parameter }}"
           cat cfn-params.json
 
       - name: Package CloudFormation template
