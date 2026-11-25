@@ -104,8 +104,8 @@ Resources:
                         "Name": object_key
                       }
                     },
-                    MaxLabels = os.environ["MAX_LABELS"],
-                    MinConfidence = os.environ["MIN_CONFIDENCE"]
+                    MaxLabels = int(os.environ["MAX_LABELS"]),
+                    MinConfidence = int(os.environ["MIN_CONFIDENCE"])
                   )
 
                   label_list = [
