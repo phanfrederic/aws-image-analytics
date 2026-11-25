@@ -1,5 +1,21 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
+Parameters:
+  DeploymentEnvironment:
+    Type: "String"
+  LambdaRuntime":
+    Type: "String"
+  LambdaTimeout:
+    Type: "Number"
+  RekognitionMaxLabels:
+    Type: "Number"
+  RekognitionMinConfidence:
+    Type: "Number"
+  SqsRedrivePolicyMaxReceiveCount:
+    Type: "Number"
+  SqsVisibilityTimeout:
+    Type: "Number"
+
 Resources:
   DynamoDbStack:
     Properties:
@@ -27,5 +43,8 @@ Resources:
   
   SqsStack:
     Properties:
+      Parameters:
+        RedrivePolicyMaxReceiveCount: !Ref SqsRedrivePolicyMaxReceiveCount
+        VisibilityTimeout: !Ref SqsVisibilityTimeout
       TemplateURL: "./templates/sqs.yaml"
     Type: "AWS::CloudFormation::Stack"
