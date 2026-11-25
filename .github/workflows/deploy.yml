@@ -12,7 +12,7 @@ jobs:
         name: Read environment configuration
         run: |
           echo "environment-configuration=$(jq -ce '.github_configuration' parameters/${{ inputs.environment || 'development' }}.json)" >> $GITHUB_OUTPUT
-          echo "aws-param=$(jq -e '[.aws_parameter | to_entries[] | {ParameterKey: .key, ParameterValue: .value}]' parameters/${{ inputs.environment || 'development' }}.json)" >> $GITHUB_OUTPUT
+          echo "aws-param=$(jq -ce '[.aws_parameter | to_entries[] | {ParameterKey: .key, ParameterValue: .value}]' parameters/${{ inputs.environment || 'development' }}.json)" >> $GITHUB_OUTPUT
 
   set-up:
     needs: prepare
