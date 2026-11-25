@@ -12,7 +12,7 @@ jobs:
         name: Read environment configuration
         run: |
           echo "environment-configuration=$(jq -ce '.github_configuration' parameters/${{ inputs.environment || 'development' }}.json)" >> $GITHUB_OUTPUT
-          echo "aws-param=$(jq -ce '[.aws_parameter | to_entries[] | {ParameterKey: .key, ParameterValue: .value}]' parameters/${{ inputs.environment || 'development' }}.json)" >> $GITHUB_OUTPUT
+          echo "aws-param=$(jq -ce '[.aws_parameter | to_entries[] | {ParameterKey: .key, ParameterValue: .value}]' parameters/${{ inputs.environment || 'development' }}.json | base64 -w 0)" >> $GITHUB_OUTPUT
 
   set-up:
     needs: prepare
@@ -61,7 +61,7 @@ jobs:
 
       - name: Create configuration file
         run: |
-          printf "${{ needs.prepare.outputs.aws-parameter }}" > cfn-params.json
+          printf "${{ needs.prepare.outputs.aws-parameter }}" | base64 -d > cfn-params.json
           echo "${{ needs.prepare.outputs.aws-parameter }}"
           cat cfn-params.json
 
