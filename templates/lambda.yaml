@@ -130,6 +130,7 @@ Resources:
                     "itemIdentifier": sqs_record["messageId"]
                   }
                 )
+                print(e)
             
             return {"batchItemFailures": item_failure_list}
 
