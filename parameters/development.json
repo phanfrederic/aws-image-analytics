@@ -8,10 +8,10 @@
     "aws_parameter": {
         "DeploymentEnvironment": "development",
         "LambdaRuntime": "python3.14",
-        "LambdaTimeout": 60,
-        "RekognitionMaxLabels": 10,
-        "RekognitionMinConfidence": 80,
-        "SqsRedrivePolicyMaxReceiveCount": 3,
-        "SqsVisibilityTimeout": 360
+        "LambdaTimeout": "60",
+        "RekognitionMaxLabels": "10",
+        "RekognitionMinConfidence": "80",
+        "SqsRedrivePolicyMaxReceiveCount": "3",
+        "SqsVisibilityTimeout": "360"
     }
 }
