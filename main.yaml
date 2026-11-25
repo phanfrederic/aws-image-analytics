@@ -3,7 +3,7 @@ AWSTemplateFormatVersion: "2010-09-09"
 Parameters:
   DeploymentEnvironment:
     Type: "String"
-  LambdaRuntime":
+  LambdaRuntime:
     Type: "String"
   LambdaTimeout:
     Type: "Number"
