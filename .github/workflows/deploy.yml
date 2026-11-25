@@ -2,6 +2,7 @@ jobs:
   prepare:
     outputs:
       environment-configuration: ${{ steps.read-environment-configuration.outputs.environment-configuration }}
+      aws-parameter: ${{ steps.read-environment-configuration.outputs.aws-param }}
     runs-on: "ubuntu-latest"
     steps:
       - name: Check out repository
@@ -10,14 +11,8 @@ jobs:
       - id: read-environment-configuration
         name: Read environment configuration
         run: |
-          echo "environment-configuration=$(jq -c '.github_configuration' parameters/${{ inputs.environment || 'development' }}.json)" >> $GITHUB_OUTPUT
-
-          jq '[.aws_parameter | to_entries[] | {ParameterKey: .key, ParameterValue: .value}]' parameters/${{ inputs.environment || 'development' }}.json > cfn-params.json
-      
-      - name: Upload configuration file
-        uses: actions/upload-artifact@v7
-        with:
-          path: cfn-params.json
+          echo "environment-configuration=$(jq -ce '.github_configuration' parameters/${{ inputs.environment || 'development' }}.json)" >> $GITHUB_OUTPUT
+          echo "aws-param=$(jq -e '[.aws_parameter | to_entries[] | {ParameterKey: .key, ParameterValue: .value}]' parameters/${{ inputs.environment || 'development' }}.json)" >> $GITHUB_OUTPUT
 
   set-up:
     needs: prepare
@@ -64,10 +59,9 @@ jobs:
           aws-region: ${{ fromJSON(needs.prepare.outputs.environment-configuration).aws_deployment_region }}
           role-to-assume: ${{ fromJSON(needs.prepare.outputs.environment-configuration).assumed_role_arn }}
 
-      - name: Download configuration file
-        uses: actions/download-artifact@v8
-        with:
-          name: cfn-params.json
+      - name: Create configuration file
+        run: |
+          printf "${{ needs.prepare.outputs.aws-parameter }}" > cfn-params.json
 
       - name: Package CloudFormation template
         run: |
