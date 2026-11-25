@@ -104,8 +104,8 @@ Resources:
                         "Name": object_key
                       }
                     },
-                    MaxLabels = ${{ !Ref MaxLabels }},
-                    MinConfidence = ${{ !Ref MinConfidence }}
+                    MaxLabels = os.environ["MAX_LABELS"],
+                    MinConfidence = os.environ["MIN_CONFIDENCE"]
                   )
 
                   label_list = [
@@ -135,7 +135,10 @@ Resources:
 
       Environment:
         Variables:
+          MAX_LABELS: !Ref MaxLabels
+          MIN_CONFIDENCE: !Ref MinConfidence
           TABLE_NAME: !Ref DynamoDbTableName
+
       Handler: "index.handler"
       Role: !GetAtt IamRole.Arn
       Runtime: !Ref Runtime
