@@ -11,6 +11,15 @@ Parameters:
     Type: String
   SqsQueueArn:
     Type: String
+  
+  Runtime:
+    Type: "String"
+  Timeout:
+    Type: "Number"
+  MaxLabels:
+    Type: "Number"
+  MinConfidence:
+    Type: "Number"
 
 Resources:
   IamRole:
@@ -95,8 +104,8 @@ Resources:
                         "Name": object_key
                       }
                     },
-                    MaxLabels = 10,
-                    MinConfidence = 80
+                    MaxLabels = ${{ !Ref MaxLabels }},
+                    MinConfidence = ${{ !Ref MinConfidence }}
                   )
 
                   label_list = [
@@ -129,6 +138,6 @@ Resources:
           TABLE_NAME: !Ref DynamoDbTableName
       Handler: "index.handler"
       Role: !GetAtt IamRole.Arn
-      Runtime: "python3.14"
-      Timeout: 60
+      Runtime: !Ref Runtime
+      Timeout: !Ref Timeout
     Type: "AWS::Lambda::Function"
