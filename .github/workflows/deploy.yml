@@ -1,94 +1,95 @@
 jobs:
   prepare:
     outputs:
-      environment-configuration: ${{ steps.read-environment-configuration.outputs.environment-configuration }}
-      aws-parameter: ${{ steps.read-environment-configuration.outputs.aws-param }}
+      cloudformation-stack-parameter: ${{ steps.load-environment-configuration.outputs.stack-parameter }}
+      github-environment-configuration: ${{ steps.load-environment-configuration.outputs.workflow-configuration }}
     runs-on: "ubuntu-latest"
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
+      - name: "Check out repository"
+        uses: "actions/checkout@v7"
 
-      - id: read-environment-configuration
-        name: Read environment configuration
+      - id: "load-environment-configuration"
+        env:
+          PARAMETER_FILE_FORMAT: "{ParameterKey: .key, ParameterValue: .value}"
+          PARAMETER_FILE_NAME: "parameters/${{ inputs.environment || 'development' }}.json"
+        name: "Load environment configuration"
         run: |
-          echo "environment-configuration=$(jq -ce '.github_configuration' parameters/${{ inputs.environment || 'development' }}.json)" >> $GITHUB_OUTPUT
-          echo "aws-param=$(jq -ce '[.aws_parameter | to_entries[] | {ParameterKey: .key, ParameterValue: .value}]' parameters/${{ inputs.environment || 'development' }}.json | base64 -w 0)" >> $GITHUB_OUTPUT
+          echo "stack-parameter=$(jq -ce '[.cloudformation_stack_parameter | to_entries[] | $PARAMETER_FILE_FORMAT]' $PARAMETER_FILE_NAME | base64 -w 0)" >> $GITHUB_OUTPUT
+          echo "workflow-configuration=$(jq -ce '.github_workflow_configuration' $PARAMETER_FILE_NAME)" >> $GITHUB_OUTPUT
 
-  set-up:
-    needs: prepare
+  bootstrap:
+    needs: "prepare"
     outputs:
-      artifact-bucket-name: ${{ steps.get-artifact-bucket-name.outputs.artifact-bucket-name }}
-    runs-on: ubuntu-latest
+      artifact-bucket-name: ${{ steps.get-artifact-bucket-name.outputs.bucket-name }}
+    runs-on: "ubuntu-latest"
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
+      - name: "Check out repository"
+        uses: "actions/checkout@v7"
 
-      - name: Configure AWS credential
-        uses: aws-actions/configure-aws-credentials@v6
+      - name: "Configure AWS credential"
+        uses: "aws-actions/configure-aws-credentials@v6"
         with:
-          aws-region: ${{ fromJSON(needs.prepare.outputs.environment-configuration).aws_deployment_region }}
-          role-to-assume: ${{ fromJSON(needs.prepare.outputs.environment-configuration).assumed_role_arn }}
+          aws-region: "${{ fromJSON(needs.prepare.outputs.github-environment-configuration).deployment_region_name }}"
+          role-to-assume: "${{ fromJSON(needs.prepare.outputs.github-environment-configuration).assumed_role_arn }}"
 
-      - name: Deploy artifact bucket
+      - name: "Deploy artifact bucket"
         run: |
           aws cloudformation deploy \
-            --stack-name ${{ fromJSON(needs.prepare.outputs.environment-configuration).prepare_stack_name }} \
+            --stack-name ${{ fromJSON(needs.prepare.outputs.environment-configuration).bootstrap_stack_name }} \
             --template-file ./templates/bootstrap.yaml
 
-      - id: get-artifact-bucket-name
-        name: Get artifact bucket name
+      - id: "get-artifact-bucket-name"
+        name: "Get artifact bucket name"
         run: |
           artifact_bucket_name=$(aws cloudformation describe-stacks \
             --output text \
             --query "Stacks[0].Outputs[?OutputKey=='S3BucketName'].OutputValue" \
-            --stack-name ${{ fromJSON(needs.prepare.outputs.environment-configuration).prepare_stack_name }})
-          echo "artifact-bucket-name=$artifact_bucket_name" >> $GITHUB_OUTPUT
+            --stack-name ${{ fromJSON(needs.prepare.outputs.environment-configuration).bootstrap_stack_name }})
+          echo "bucket-name=$artifact_bucket_name" >> $GITHUB_OUTPUT
 
   deploy:
     needs:
-      - prepare 
-      - set-up
-    runs-on: ubuntu-latest
+      - "prepare"
+      - "bootstrap"
+    runs-on: "ubuntu-latest"
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
+      - name: "Check out repository"
+        uses: "actions/checkout@v7"
 
-      - name: Configure AWS credential
-        uses: aws-actions/configure-aws-credentials@v6
+      - name: "Configure AWS credential"
+        uses: "aws-actions/configure-aws-credentials@v6"
         with:
-          aws-region: ${{ fromJSON(needs.prepare.outputs.environment-configuration).aws_deployment_region }}
-          role-to-assume: ${{ fromJSON(needs.prepare.outputs.environment-configuration).assumed_role_arn }}
+          aws-region: "${{ fromJSON(needs.prepare.outputs.environment-configuration).deployment_region_name }}"
+          role-to-assume: "${{ fromJSON(needs.prepare.outputs.environment-configuration).assumed_role_arn }}"
 
-      - name: Create configuration file
+      - name: "Create parameter file"
         run: |
-          printf "${{ needs.prepare.outputs.aws-parameter }}" | base64 -d > cfn-params.json
-          echo "${{ needs.prepare.outputs.aws-parameter }}"
-          cat cfn-params.json
+          printf "${{ needs.prepare.outputs.cloudformation-stack-parameter }}" | base64 -d > cloudformation-parameter-list.json
 
-      - name: Package CloudFormation template
+      - name: "Package CloudFormation template"
         run: |
           aws cloudformation package \
             --output-template-file ./packaged-main.yaml \
-            --s3-bucket ${{ needs.set-up.outputs.artifact-bucket-name }} \
+            --s3-bucket ${{ needs.bootstrap.outputs.artifact-bucket-name }} \
             --template-file ./main.yaml
 
-      - name: Deploy CloudFormation stack
+      - name: "Deploy CloudFormation stack"
         run: |
           aws cloudformation deploy \
             --capabilities CAPABILITY_NAMED_IAM \
-            --parameter-overrides file://cfn-params.json \
-            --stack-name ${{ fromJSON(needs.prepare.outputs.environment-configuration).deploy_stack_name }} \
+            --parameter-overrides file://cloudformation-parameter-list.json \
+            --stack-name ${{ fromJSON(needs.prepare.outputs.github-environment-configuration).deploy_stack_name }} \
             --template-file ./packaged-main.yaml
 
 on:
   push:
     branches:
-      - main
+      - "main"
   workflow_dispatch:
     inputs:
       environment:
         default: "development"
-        description: "Choose target deployment environment"
+        description: "Choose a target deployment environment"
         options:
           - "development"
           - "production"
@@ -97,5 +98,5 @@ on:
         type: "choice"
 
 permissions:
-  contents: read
-  id-token: write
+  contents: "read"
+  id-token: "write"

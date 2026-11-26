@@ -23,7 +23,7 @@ Resources:
     Type: "AWS::SQS::Queue"
 
   SqsQueuePolicy:
-    Properties: 
+    Properties:
       PolicyDocument:
         Statement:
           Action: 
