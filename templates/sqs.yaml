@@ -5,9 +5,9 @@ Outputs:
     Value: !GetAtt SqsQueue.Arn
 
 Parameters:
-  RedrivePolicyMaxReceiveCount:
+  SqsRedrivePolicyMaxReceiveCount:
     Type: "Number"
-  VisibilityTimeout:
+  SqsVisibilityTimeout:
     Type: "Number"
 
 Resources:
@@ -18,8 +18,8 @@ Resources:
     Properties:
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt DlqQueue.Arn
-        maxReceiveCount: !Ref RedrivePolicyMaxReceiveCount
-      VisibilityTimeout: !Ref VisibilityTimeout
+        maxReceiveCount: !Ref SqsRedrivePolicyMaxReceiveCount
+      VisibilityTimeout: !Ref SqsVisibilityTimeout
     Type: "AWS::SQS::Queue"
 
   SqsQueuePolicy:

@@ -3,13 +3,13 @@ AWSTemplateFormatVersion: "2010-09-09"
 Parameters:
   DeploymentEnvironment:
     Type: "String"
+  LambdaRekognitionMaxLabels:
+    Type: "Number"
+  LambdaRekognitionMinConfidence:
+    Type: "Number"
   LambdaRuntime:
     Type: "String"
   LambdaTimeout:
-    Type: "Number"
-  RekognitionMaxLabels:
-    Type: "Number"
-  RekognitionMinConfidence:
     Type: "Number"
   SqsRedrivePolicyMaxReceiveCount:
     Type: "Number"
@@ -27,13 +27,13 @@ Resources:
       Parameters:
         DynamoDbTableArn: !GetAtt DynamoDbStack.Outputs.DynamoDbTableArn
         DynamoDbTableName: !GetAtt DynamoDbStack.Outputs.DynamoDbTableName
-        MaxLabels: !Ref RekognitionMaxLabels
-        MinConfidence: !Ref RekognitionMinConfidence
-        Runtime: !Ref LambdaRuntime
+        LambdaRekognitionMaxLabels: !Ref LambdaRekognitionMaxLabels
+        LambdaRekognitionMinConfidence: !Ref LambdaRekognitionMinConfidence
+        LambdaRuntime: !Ref LambdaRuntime
+        LambdaTimeout: !Ref LambdaTimeout
         S3BucketArn: !GetAtt S3Stack.Outputs.S3BucketArn
         S3BucketName: !GetAtt S3Stack.Outputs.S3BucketName
         SqsQueueArn: !GetAtt SqsStack.Outputs.SqsQueueArn
-        Timeout: !Ref LambdaTimeout
       TemplateURL: "./templates/lambda.yaml"
     Type: "AWS::CloudFormation::Stack"
 
@@ -48,7 +48,7 @@ Resources:
   SqsStack:
     Properties:
       Parameters:
-        RedrivePolicyMaxReceiveCount: !Ref SqsRedrivePolicyMaxReceiveCount
-        VisibilityTimeout: !Ref SqsVisibilityTimeout
+        SqsRedrivePolicyMaxReceiveCount: !Ref SqsRedrivePolicyMaxReceiveCount
+        SqsVisibilityTimeout: !Ref SqsVisibilityTimeout
       TemplateURL: "./templates/sqs.yaml"
     Type: "AWS::CloudFormation::Stack"

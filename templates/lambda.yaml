@@ -5,20 +5,20 @@ Parameters:
     Type: "String"
   DynamoDbTableName:
     Type: "String"
-  MaxLabels:
+  LambdaRekognitionMaxLabels:
     Type: "Number"
-  MinConfidence:
+  LambdaRekognitionMinConfidence:
     Type: "Number"
-  Runtime:
+  LambdaRuntime:
     Type: "String"
+  LambdaTimeout:
+    Type: "Number"
   S3BucketArn:
     Type: "String"
   S3BucketName:
     Type: "String"
   SqsQueueArn:
     Type: "String"
-  Timeout:
-    Type: "Number"
 
 Resources:
   IamRole:
@@ -135,12 +135,12 @@ Resources:
 
       Environment:
         Variables:
-          MAX_LABELS: !Ref MaxLabels
-          MIN_CONFIDENCE: !Ref MinConfidence
+          MAX_LABELS: !Ref LambdaRekognitionMaxLabels
+          MIN_CONFIDENCE: !Ref LambdaRekognitionMinConfidence
           TABLE_NAME: !Ref DynamoDbTableName
 
       Handler: "index.handler"
       Role: !GetAtt IamRole.Arn
-      Runtime: !Ref Runtime
-      Timeout: !Ref Timeout
+      Runtime: !Ref LambdaRuntime
+      Timeout: !Ref LambdaTimeout
     Type: "AWS::Lambda::Function"
