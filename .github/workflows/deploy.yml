@@ -59,8 +59,8 @@ jobs:
       - name: "Configure AWS credential"
         uses: "aws-actions/configure-aws-credentials@v6"
         with:
-          aws-region: "${{ fromJSON(needs.bootstrap.prepare.github-environment-configuration).deployment_region_name }}"
-          role-to-assume: "${{ fromJSON(needs.bootstrap.prepare.github-environment-configuration).assumed_role_arn }}"
+          aws-region: "${{ fromJSON(needs.prepare.outputs.github-environment-configuration).deployment_region_name }}"
+          role-to-assume: "${{ fromJSON(needs.prepare.outputs.github-environment-configuration).assumed_role_arn }}"
 
       - name: "Create parameter file"
         run: |
