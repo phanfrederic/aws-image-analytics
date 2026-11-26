@@ -35,7 +35,7 @@ jobs:
       - name: "Deploy artifact bucket"
         run: |
           aws cloudformation deploy \
-            --stack-name ${{ fromJSON(needs.prepare.outputs.environment-configuration).bootstrap_stack_name }} \
+            --stack-name ${{ fromJSON(needs.prepare.outputs.github-environment-configuration).bootstrap_stack_name }} \
             --template-file ./templates/bootstrap.yaml
 
       - id: "get-artifact-bucket-name"
@@ -44,7 +44,7 @@ jobs:
           artifact_bucket_name=$(aws cloudformation describe-stacks \
             --output text \
             --query "Stacks[0].Outputs[?OutputKey=='S3BucketName'].OutputValue" \
-            --stack-name ${{ fromJSON(needs.prepare.outputs.environment-configuration).bootstrap_stack_name }})
+            --stack-name ${{ fromJSON(needs.prepare.outputs.github-environment-configuration).bootstrap_stack_name }})
           echo "bucket-name=$artifact_bucket_name" >> $GITHUB_OUTPUT
 
   deploy:
@@ -59,8 +59,8 @@ jobs:
       - name: "Configure AWS credential"
         uses: "aws-actions/configure-aws-credentials@v6"
         with:
-          aws-region: "${{ fromJSON(needs.prepare.outputs.environment-configuration).deployment_region_name }}"
-          role-to-assume: "${{ fromJSON(needs.prepare.outputs.environment-configuration).assumed_role_arn }}"
+          aws-region: "${{ fromJSON(needs.prepare.outputs.github-environment-configuration).deployment_region_name }}"
+          role-to-assume: "${{ fromJSON(needs.prepare.outputs.github-environment-configuration).assumed_role_arn }}"
 
       - name: "Create parameter file"
         run: |
