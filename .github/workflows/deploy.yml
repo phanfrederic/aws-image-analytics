@@ -14,8 +14,10 @@ jobs:
           PARAMETER_FILE_NAME: "parameters/${{ inputs.environment || 'development' }}.json"
         name: "Load environment configuration"
         run: |
-          echo "stack-parameter=$(jq -ce '[.cloudformation_stack_parameter | to_entries[] | $PARAMETER_FILE_FORMAT]' $PARAMETER_FILE_NAME | base64 -w 0)" >> $GITHUB_OUTPUT
-          echo "workflow-configuration=$(jq -ce '.github_workflow_configuration' $PARAMETER_FILE_NAME)" >> $GITHUB_OUTPUT
+          STACK_PARAMETER=$(jq -ce "[.cloudformation_stack_parameter | to_entries[] | $PARAMETER_FILE_FORMAT]" "$PARAMETER_FILE_NAME" | base64 -w 0)
+          echo "stack-parameter=$STACK_PARAMETER" >> $GITHUB_OUTPUT
+          WORKFLOW_CONFIGURATION=$(jq -ce ".github_workflow_configuration" "$PARAMETER_FILE_NAME")
+          echo "workflow-configuration=$WORKFLOW_CONFIGURATION" >> $GITHUB_OUTPUT
 
   bootstrap:
     needs: "prepare"
