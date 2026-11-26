@@ -59,12 +59,12 @@ jobs:
       - name: "Configure AWS credential"
         uses: "aws-actions/configure-aws-credentials@v6"
         with:
-          aws-region: "${{ fromJSON(needs.prepare.outputs.github-environment-configuration).deployment_region_name }}"
-          role-to-assume: "${{ fromJSON(needs.prepare.outputs.github-environment-configuration).assumed_role_arn }}"
+          aws-region: "${{ fromJSON(needs.bootstrap.outputs.github-environment-configuration).deployment_region_name }}"
+          role-to-assume: "${{ fromJSON(needs.bootstrap.outputs.github-environment-configuration).assumed_role_arn }}"
 
       - name: "Create parameter file"
         run: |
-          printf "${{ needs.prepare.outputs.cloudformation-stack-parameter }}" | base64 -d > cloudformation-parameter-list.json
+          printf "${{ needs.bootstrap.outputs.cloudformation-stack-parameter }}" | base64 -d > cloudformation-parameter-list.json
 
       - name: "Package CloudFormation template"
         run: |
@@ -78,7 +78,7 @@ jobs:
           aws cloudformation deploy \
             --capabilities CAPABILITY_NAMED_IAM \
             --parameter-overrides file://cloudformation-parameter-list.json \
-            --stack-name ${{ fromJSON(needs.prepare.outputs.github-environment-configuration).deploy_stack_name }} \
+            --stack-name ${{ fromJSON(needs.bootstrap.outputs.github-environment-configuration).deploy_stack_name }} \
             --template-file ./packaged-main.yaml
 
 on:
