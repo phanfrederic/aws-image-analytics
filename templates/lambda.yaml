@@ -2,23 +2,22 @@ AWSTemplateFormatVersion: "2010-09-09"
 
 Parameters:
   DynamoDbTableArn:
-    Type: String
-  DynamoDbTableName:
-    Type: String
-  S3BucketArn:
-    Type: String
-  S3BucketName:
-    Type: String
-  SqsQueueArn:
-    Type: String
-  
-  Runtime:
     Type: "String"
-  Timeout:
-    Type: "Number"
+  DynamoDbTableName:
+    Type: "String"
   MaxLabels:
     Type: "Number"
   MinConfidence:
+    Type: "Number"
+  Runtime:
+    Type: "String"
+  S3BucketArn:
+    Type: "String"
+  S3BucketName:
+    Type: "String"
+  SqsQueueArn:
+    Type: "String"
+  Timeout:
     Type: "Number"
 
 Resources:

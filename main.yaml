@@ -27,19 +27,18 @@ Resources:
       Parameters:
         DynamoDbTableArn: !GetAtt DynamoDbStack.Outputs.DynamoDbTableArn
         DynamoDbTableName: !GetAtt DynamoDbStack.Outputs.DynamoDbTableName
+        MaxLabels: !Ref RekognitionMaxLabels
+        MinConfidence: !Ref RekognitionMinConfidence
+        Runtime: !Ref LambdaRuntime
         S3BucketArn: !GetAtt S3Stack.Outputs.S3BucketArn
         S3BucketName: !GetAtt S3Stack.Outputs.S3BucketName
         SqsQueueArn: !GetAtt SqsStack.Outputs.SqsQueueArn
-
-        Runtime: !Ref LambdaRuntime
         Timeout: !Ref LambdaTimeout
-        MaxLabels: !Ref RekognitionMaxLabels
-        MinConfidence: !Ref RekognitionMinConfidence
       TemplateURL: "./templates/lambda.yaml"
     Type: "AWS::CloudFormation::Stack"
 
   S3Stack:
-    DependsOn: SqsStack
+    DependsOn: "SqsStack"
     Properties:
       Parameters:
         SqsQueueArn: !GetAtt SqsStack.Outputs.SqsQueueArn

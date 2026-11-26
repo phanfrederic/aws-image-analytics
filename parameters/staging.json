@@ -1,17 +1,18 @@
 {
-    "github_configuration": {
-        "assumed_role_arn": "arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction",
-        "aws_deployment_region": "eu-west-1",
-        "deploy_stack_name": "image-analytics-deploy-stack",
-        "prepare_stack_name": "image-analytics-prepare-stack"
-    },
-    "aws_parameter": {
-        "DeploymentEnvironment": "development",
+    "cloudformation_stack_parameter": {
+        "DeploymentEnvironment": "staging",
         "LambdaRuntime": "python3.14",
-        "LambdaTimeout": "60",
+        "LambdaTimeout": "10",
         "RekognitionMaxLabels": "10",
         "RekognitionMinConfidence": "80",
         "SqsRedrivePolicyMaxReceiveCount": "3",
-        "SqsVisibilityTimeout": "360"
+        "SqsVisibilityTimeout": "100"
+    },
+    "github_workflow_configuration": {
+        "assumed_role_arn": "arn:aws:iam::792682046860:role/GitHubAction-AssumeRoleWithAction",
+        "bootstrap_stack_name": "image-analytics-bootstrap-stack",
+        "deployment_region_name": "eu-west-1",
+        "deploy_stack_name": "image-analytics-deploy-stack"
     }
 }
+
