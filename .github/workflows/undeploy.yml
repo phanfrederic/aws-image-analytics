@@ -27,8 +27,8 @@ jobs:
           role-to-assume: "${{ fromJSON(needs.prepare.outputs.github-workflow-configuration).assumed_role_arn }}"
 
       - env:
-          BOOTSTRAP_STACK_NAME: "${{ fromJSON(needs.prepare.outputs.github_workflow_configuration).bootstrap_stack_name }}"
-          DEPLOY_STACK_NAME: "${{ fromJSON(needs.prepare.outputs.github_workflow_configuration).deploy_stack_name }}"
+          BOOTSTRAP_STACK_NAME: "${{ fromJSON(needs.prepare.outputs.github-workflow-configuration).bootstrap_stack_name }}"
+          DEPLOY_STACK_NAME: "${{ fromJSON(needs.prepare.outputs.github-workflow-configuration).deploy_stack_name }}"
         name: "Empty S3 bucket(s)"
         run: |
           for root_stack_name in $BOOTSTRAP_STACK_NAME $DEPLOY_STACK_NAME; do
@@ -68,8 +68,8 @@ jobs:
           role-to-assume: "${{ fromJSON(needs.prepare.outputs.github-workflow-configuration).assumed_role_arn }}"
       
       - env:
-          BOOTSTRAP_STACK_NAME: "${{ fromJSON(needs.prepare.outputs.github_workflow_configuration).bootstrap_stack_name }}"
-          DEPLOY_STACK_NAME: "${{ fromJSON(needs.prepare.outputs.github_workflow_configuration).deploy_stack_name }}"
+          BOOTSTRAP_STACK_NAME: "${{ fromJSON(needs.prepare.outputs.github-workflow-configuration).bootstrap_stack_name }}"
+          DEPLOY_STACK_NAME: "${{ fromJSON(needs.prepare.outputs.github-workflow-configuration).deploy_stack_name }}"
         name: "Undeploy CloudFormation stack(s)"
         run: |
           for root_stack_name in $BOOTSTRAP_STACK_NAME $DEPLOY_STACK_NAME; do
