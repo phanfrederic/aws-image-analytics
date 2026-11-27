@@ -69,7 +69,7 @@ jobs:
           printf "${{ needs.prepare.outputs.cloudformation-stack-parameter }}" | base64 -d > cloudformation-parameter-list.json
           echo "${{ needs.prepare.outputs.cloudformation-stack-parameter }}"
 
-      - name: "Package CloudFormation template"
+      - name: "Package CloudFormation template(s)"
         run: |
           aws cloudformation package \
             --output-template-file ./packaged-main.yaml \
