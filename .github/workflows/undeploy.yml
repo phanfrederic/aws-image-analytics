@@ -8,7 +8,7 @@ jobs:
       - name: "Check out repository"
         uses: "actions/checkout@v7"
       
-      - if: "load-environment-configuration"
+      - id: "load-environment-configuration"
         env: 
           PARAMETER_FILE_NAME: "parameters/${{ inputs.environment || 'development' }}.json"
         name: "Load environment configuration"
